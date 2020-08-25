@@ -76,8 +76,11 @@ extension UnsafePixelRef {
 extension UnsafePixelRef where T == UInt8 {
     @inlinable
     public func initialize(to color: Color<P, T>) {
+        var colorData = color.data
         let rawPointer = UnsafeMutableRawBufferPointer(pointer)
-        rawPointer.copyMemory(from: color.dataPointer)
+        rawPointer.copyMemory(from: UnsafeRawBufferPointer(
+            UnsafeBufferPointer(start: &colorData[0], count: P.channels)
+        ))
     }
 }
 
