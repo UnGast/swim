@@ -1,6 +1,9 @@
 public struct Color<P: PixelType, T: DataType> {
     @usableFromInline
     var data: ArraySlice<T>
+        
+    @usableFromInline
+    var dataPointer: UnsafeRawBufferPointer
     
     @inlinable
     public init(data: [T]) {
@@ -12,6 +15,9 @@ public struct Color<P: PixelType, T: DataType> {
         precondition(data.count == P.channels,
                      "Size of `data` must be exact same as the number of channels.")
         self.data = data
+        self.dataPointer = UnsafeRawBufferPointer(
+            UnsafeBufferPointer(start: &self.data[0], count: data.count)
+        )
     }
     
     @inlinable
@@ -57,7 +63,11 @@ extension Color: Equatable where T: Equatable {
     }
 }
 
-extension Color: Hashable where T: Hashable {}
+extension Color: Hashable where T: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(data)
+    }
+}
 
 extension Color {
     @inlinable
