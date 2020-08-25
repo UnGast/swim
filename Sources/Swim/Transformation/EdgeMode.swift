@@ -87,11 +87,11 @@ extension Image {
     /// Otherwise, extrapolate color by `edgeMode`.
     @inlinable
     public subscript(x: Int, y: Int, edgeMode edgeMode: EdgeMode<P, T>) -> Color<P, T> {
-        if let x = edgeMode.clampValue(value: x, max: width),
+        if case let .constant(color) = edgeMode {
+            return color
+        } else if let x = edgeMode.clampValue(value: x, max: width),
             let y = edgeMode.clampValue(value: y, max: height) {
             return self[x, y]
-        } else if case let .constant(color) = edgeMode {
-            return color
         } else {
             fatalError("Never happens.")
         }

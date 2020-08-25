@@ -13,7 +13,7 @@ public struct UnsafePixelRef<P: PixelType, T: DataType> {
     public let x: Int
     public let y: Int
     
-    public let pointer: UnsafeMutableBufferPointer<T>
+    public var pointer: UnsafeMutableBufferPointer<T>
     
     @inlinable
     init(x: Int, y: Int, pointer: UnsafeMutableBufferPointer<T>) {
@@ -63,12 +63,24 @@ extension UnsafePixelRef {
     }
     
     @inlinable
-    public func initialize<C: ColorProtocol>(to color: C) where C.P == P, C.T == T {
+    public func initialize(to color: Color<P, T>) {
         var p = pointer.baseAddress!
         for i in 0..<P.channels {
+            p.pointee = color[i]
             p.initialize(to: color[i])
             p += 1
         }
+    }
+}
+
+extension UnsafePixelRef where T == UInt8 {
+    @inlinable
+    public func initialize(to color: Color<P, T>) {
+        var colorData = color.data
+        let rawPointer = UnsafeMutableRawBufferPointer(pointer)
+        rawPointer.copyMemory(from: UnsafeRawBufferPointer(
+            UnsafeBufferPointer(start: &colorData[0], count: P.channels)
+        ))
     }
 }
 
